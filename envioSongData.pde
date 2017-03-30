@@ -10,10 +10,11 @@ import netP5.*;
 Minim minim;  
 AudioPlayer techno;
 AudioPlayer rock;
+AudioPlayer tropical;
 FFT fftLin;
 FFT fftLog;
 float height23;
-float spectrumScale = 4;
+float spectrumScale = 20;
 
 
 //network stuff
@@ -34,11 +35,13 @@ void setup(){
   minim = new Minim(this);
   techno = minim.loadFile("Dubfire & Oliver Huntemann - Humano (Victor Ruiz Remix).mp3", 1024);
   rock = minim.loadFile("Silversun Pickups - Lazy Eye.mp3", 1024);
+  tropical = minim.loadFile("Quantic & Nidia Góngora - Que Me Duele_.mp3", 1024);
+ 
   
   //network stuff again
   //broadcast to port 6881 and receive at 6882 
   oscP5 = new OscP5(this, 6882); 
-  myBroadcastLocation = new NetAddress("localhost", 6881);
+  myBroadcastLocation = new NetAddress("localhost", 3000);
   
   // loop the file
   techno.loop();
