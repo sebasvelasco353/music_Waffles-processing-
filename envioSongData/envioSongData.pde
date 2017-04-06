@@ -13,6 +13,8 @@ AudioPlayer rock;
 AudioPlayer tropical;
 FFT fftLin;
 FFT fftLog;
+ArrayList<AudioPlayer>misCanciones = new ArrayList <AudioPlayer>();
+int sonando = 0;
 float height23;
 float spectrumScale = 20;
 
@@ -36,6 +38,10 @@ void setup() {
   techno = minim.loadFile("Dubfire & Oliver Huntemann - Humano (Victor Ruiz Remix).mp3", 1024);
   rock = minim.loadFile("Silversun Pickups - Lazy Eye.mp3", 1024);
   tropical = minim.loadFile("Quantic & Nidia Góngora - Que Me Duele_.mp3", 1024);
+  
+  misCanciones.add(techno);
+  misCanciones.add(rock);
+  misCanciones.add(tropical);
 
 
   //network stuff again
@@ -44,7 +50,7 @@ void setup() {
   myBroadcastLocation = new NetAddress("localhost", 3000);
 
   // loop the file
-  techno.loop();
+  misCanciones.get(sonando).loop();
 
   // create an FFT object that has a time-domain buffer the same size as techno's sample buffer
   // note that this needs to be a power of two 
@@ -76,8 +82,8 @@ void draw() {
 
   // perform a forward FFT on the samples in techno's mix buffer
   // note that if techno were a MONO file, this would be the same as using techno.left or techno.right
-  fftLin.forward( techno.mix );
-  fftLog.forward( techno.mix );
+  fftLin.forward( misCanciones.get(sonando).mix );
+  fftLog.forward( misCanciones.get(sonando).mix );
 
   // draw the linear averages
   {
@@ -114,14 +120,34 @@ void draw() {
 void keyPressed () {
   if (key == CODED) {
     if (keyCode == UP) {
-      techno.pause();
+      misCanciones.get(sonando).pause();
       println("pause");
     } else if (keyCode == DOWN) {
-      techno.play();
+      misCanciones.get(sonando).play();
+    }else if (keyCode == LEFT) {
+      if(sonando > 0){
+      misCanciones.get(sonando).pause();
+      sonando -= 1;
+      println("left"); 
+      } else {
+      misCanciones.get(sonando).pause();
+      sonando = (misCanciones.size()-1);
+      println("left and turn");
+      }
+      misCanciones.get(sonando).play();
+    } else if (keyCode == RIGHT) {
+       if(sonando < (misCanciones.size()-1)){
+      misCanciones.get(sonando).pause();
+      sonando += 1;
+      println("right"); 
+      } else {
+      misCanciones.get(sonando).pause();
+      sonando = 0;
+      println("right and turn");
+      }
     }
   }
 }
 
 void mousePressed() {
 }
-
