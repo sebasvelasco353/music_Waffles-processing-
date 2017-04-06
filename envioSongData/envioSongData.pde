@@ -17,6 +17,7 @@ ArrayList<AudioPlayer>misCanciones = new ArrayList <AudioPlayer>();
 int sonando = 0;
 float height23;
 float spectrumScale = 20;
+boolean pausado;
 
 
 //network stuff
@@ -29,6 +30,8 @@ OscMessage arrayMsg = new OscMessage("/array");
 final int nX=60; //array length at X
 PVector [] myArray=new PVector[nX];
 
+String lastSent;
+
 
 void setup() {
   size(512, 480);
@@ -38,7 +41,7 @@ void setup() {
   techno = minim.loadFile("Dubfire & Oliver Huntemann - Humano (Victor Ruiz Remix).mp3", 1024);
   rock = minim.loadFile("Silversun Pickups - Lazy Eye.mp3", 1024);
   tropical = minim.loadFile("Quantic & Nidia Góngora - Que Me Duele_.mp3", 1024);
-  
+
   misCanciones.add(techno);
   misCanciones.add(rock);
   misCanciones.add(tropical);
@@ -56,13 +59,13 @@ void setup() {
   // note that this needs to be a power of two 
   // and that it means the size of the spectrum will be 1024. 
   // see the online tutorial for more info.
-  fftLin = new FFT( techno.bufferSize(), techno.sampleRate() );
+  fftLin = new FFT( misCanciones.get(sonando).bufferSize(), misCanciones.get(sonando).sampleRate() );
 
   // calculate the averages by grouping frequency bands linearly. use 30 averages.
   fftLin.linAverages( 30 );
 
   // create an FFT object for calculating logarithmically spaced averages
-  fftLog = new FFT( techno.bufferSize(), techno.sampleRate() );
+  fftLog = new FFT( misCanciones.get(sonando).bufferSize(), misCanciones.get(sonando).sampleRate() );
 
   // calculate averages based on a miminum octave width of 22 Hz
   // split each octave into three bands
@@ -78,6 +81,7 @@ void draw() {
   textSize( 9 );
 
   String toSend=""; //create a new string to assemble the message
+
   arrayMsg=new OscMessage("/array");
 
   // perform a forward FFT on the samples in techno's mix buffer
@@ -107,11 +111,30 @@ void draw() {
       toSend+=myArray[i].x + ",";
       toSend+=myArray[i].y + "}";
       //this assembles "{x,y}" : a "Grasshopper ready" point
-      //text(toSend, 10, 50);
+      switch(sonando){
+       case 0: 
+       text("Techno", 10, 50);
+       break;
+       
+       case 1: 
+       text("Rock", 10, 50);
+       break;
+       
+       case 2: 
+       text("Tropical", 10, 50);
+       break;
+      }
       //println(toSend);
 
       arrayMsg.add(toSend); //this loads the string to the message container prior to sending
       oscP5.send(arrayMsg, myBroadcastLocation); //this is the actual command that sends the message
+
+      if (pausado) {
+        arrayMsg.add(lastSent); //this loads the string to the message container prior to sending
+        oscP5.send(arrayMsg, myBroadcastLocation); //this is the actual command that sends the message
+      }
+
+      lastSent = toSend;
       //println("sent");
     }
   }
@@ -121,29 +144,32 @@ void keyPressed () {
   if (key == CODED) {
     if (keyCode == UP) {
       misCanciones.get(sonando).pause();
+      pausado = true;
       println("pause");
+      arrayMsg.add(lastSent); //this loads the string to the message container prior to sending
+      oscP5.send(arrayMsg, myBroadcastLocation); //this is the actual command that sends the message
     } else if (keyCode == DOWN) {
       misCanciones.get(sonando).play();
-    }else if (keyCode == LEFT) {
-      if(sonando > 0){
-      misCanciones.get(sonando).pause();
-      sonando -= 1;
-      println("left"); 
+    } else if (keyCode == LEFT) {
+      if (sonando > 0) {
+        misCanciones.get(sonando).pause();
+        sonando -= 1;
+        println("left");
       } else {
-      misCanciones.get(sonando).pause();
-      sonando = (misCanciones.size()-1);
-      println("left and turn");
+        misCanciones.get(sonando).pause();
+        sonando = (misCanciones.size()-1);
+        println("left and turn");
       }
       misCanciones.get(sonando).play();
     } else if (keyCode == RIGHT) {
-       if(sonando < (misCanciones.size()-1)){
-      misCanciones.get(sonando).pause();
-      sonando += 1;
-      println("right"); 
+      if (sonando < (misCanciones.size()-1)) {
+        misCanciones.get(sonando).pause();
+        sonando += 1;
+        println("right");
       } else {
-      misCanciones.get(sonando).pause();
-      sonando = 0;
-      println("right and turn");
+        misCanciones.get(sonando).pause();
+        sonando = 0;
+        println("right and turn");
       }
     }
   }
