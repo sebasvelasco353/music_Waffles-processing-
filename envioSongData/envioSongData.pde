@@ -14,7 +14,7 @@ AudioPlayer tropical;
 FFT fftLin;
 FFT fftLog;
 ArrayList<AudioPlayer>misCanciones = new ArrayList <AudioPlayer>();
-int sonando = 0;
+int sonando = 2;
 float height23;
 float spectrumScale = 20;
 boolean pausado;
@@ -50,7 +50,7 @@ void setup() {
   //network stuff again
   //broadcast to port 6881 and receive at 6882 
   oscP5 = new OscP5(this, 6882); 
-  myBroadcastLocation = new NetAddress("localhost", 3000);
+  myBroadcastLocation = new NetAddress("localhost", 3005);
 
   // loop the file
   misCanciones.get(sonando).loop();
